@@ -9,7 +9,14 @@
 */
 
 function solve() {
-	return function sum() {
+	return function sum(arr) {
+		if (!arr.every(x => !Number.isNaN(Number(x)))){
+			throw "Error";
+		}
+		if (arr.length === 0){
+			return null;
+		}
+		return arr.reduce((x,y) => +x + +y,0);
 	}
 }
 

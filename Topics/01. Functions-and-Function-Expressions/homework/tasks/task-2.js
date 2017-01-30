@@ -7,8 +7,34 @@
 */
 
 function solve() {
-	return function findPrimes() {
+	return function (start, end) {
+		let primes = [];
+		if (start === undefined || end === undefined) {
+			throw "Error";
+		}
+		if (start < 2) {
+			start = 2;
+		}
+		for (var num = +start; num <= +end; num += 1) {
+			prime = true;
+
+			for (var j = 2; j < num; j += 1) {
+				if (num % j === 0) {
+					prime = false;
+					break;
+				}
+			}
+			if (prime) {
+				primes.push(num)
+			}
+		}
+		return primes;
 	}
 }
+
+// console.log(solve(5));
+// console.log(solve(1, 5));
+// console.log(solve(5, 10));
+// console.log(solve(5, 15));
 
 module.exports = solve;
