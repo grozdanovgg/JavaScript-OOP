@@ -2,42 +2,12 @@ function solve() {
     var library = (function() {
         var books = [];
         var categories = [];
-        // function returnBookWithCategory(bookToMatch) {
-        //     let result = [];
-        //     for (var i = 0; i <= categories.length; i += 1) {
-        //         if (books[i].category === bookToMatch[0].category) {
-        //             return result.push(books[i]);
-        //         }
-        //     }
-        //     return result;
-        // }
 
-        // if (!bookWithThisCategoryAdded(arguments)) {
-        //             return [];
-        //         }
 
-        // function bookWithThisCategoryAdded(arr) {
-        //     for (var i = 0; i <= categories.length; i += 1) {
-        //         if (categories[i] === arr[0].category) {
-        //             return true;
-        //         }
-        //     }
-        //     return false;
-        // }
-        function bookInCategory(obj) {
-            let result = [];
-            for (var b of books) {
-                if (b.category === obj.category) {
-                    result.push(b);
-                }
-            }
-            return result;
-        }
+        function listBooks() {
 
-        function listBooks(optional) {
-            console.log(optional.category);
+            if (!arguments[0]) {
 
-            if (!optional) {
                 if (books.length === 0) {
                     return [];
                 }
@@ -45,28 +15,12 @@ function solve() {
                     return books;
                 }
             } else {
-                if (optional.hasOwnProperty('category')) {
-                    bookInCategory(optional);
+                if (arguments[0].hasOwnProperty('category')) {
+                    return books.filter(x => x.category === arguments[0].category)
 
-                    // for (var j of categories) {
-                    //     if (j === optional.category) {
-                    //         return j;
-                    //     } else {
-
-                    //     }
-                    // }
-
-                    // if (!arguments[0].hasOwnProperty('title')) {
-                    //     for (var b of books) {
-                    //         if (b.category === arguments[0].category) {
-                    //             result.push(b);
-                    //         }
-                    //         return result;
-                    //     }
-                    // }
-                } else if (optional.hasOwnProperty('author')) {
+                } else if (arguments[0].hasOwnProperty('author')) {
                     for (var b of books) {
-                        if (b === optional.author) {
+                        if (b === arguments[0].author) {
                             return b;
                         } else {
                             return [];
@@ -75,7 +29,7 @@ function solve() {
                 }
             }
 
-            return books;
+            //return books;
         }
 
         function addBook(book) {
@@ -93,7 +47,7 @@ function solve() {
                 throw Error('Book title already added!')
             }
 
-            if (books.some(x => x.ISBN === book.ISBN)) {
+            if (books.some(x => x.isbn === book.isbn)) {
                 throw Error('This ISBN already exist in the collection!')
             }
 
@@ -114,9 +68,6 @@ function solve() {
         }
 
         function listCategories() {
-            // if (arguments.length === 1) {
-            //     return arguments;
-            // }
             return categories;
         }
 
