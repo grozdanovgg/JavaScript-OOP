@@ -5,7 +5,7 @@
 <article class="signature">
 	<p class="signature-course">JavaScript OOP</p>
 	<p class="signature-initiative">Telerik Software Academy</p>
-	<a href="http://academy.telerik.com" class="signature-link">http://academy.telerik.com</a>
+	<a href="https://telerikacademy.com" class="signature-link">https://telerikacademy.com</a>
 </article>
 
 <!-- section start -->
@@ -21,7 +21,7 @@
 
 <!-- attr: { hasScriptWrapper:true, showInPresentation:true } -->
 <!-- # Inheritance -->
-- Inheritance allows child classes to inherit the characteristics of an existing parent (base) class
+- **Inheritance** allows child classes to inherit the characteristics of an existing parent (base) class
   - Attributes (fields and properties)
   - Operations (methods)
 - Child class can extend the parent class
@@ -30,7 +30,7 @@
 
 <!-- attr: { hasScriptWrapper:true, showInPresentation:true } -->
 <!-- # Inheritance -->
-- Inheritance has a lot of benefits
+- **Inheritance** has a lot of benefits
   - Extensibility
   - Reusability (`code reuse`)
   - Provides abstraction
@@ -42,7 +42,7 @@
 
 <!-- attr: { hasScriptWrapper:true, showInPresentation:true } -->
 <!-- # Inheritance -->
-- Inheritance implicitly gains all members from another class
+- **Inheritance** implicitly gains all members from another class
   - All fields, methods, properties, events, …
   - Some members could be inaccessible (hidden)
 - The class whose methods are inherited is called base (parent) class
@@ -67,7 +67,7 @@ class Mammal {
 
 <!-- attr: { hasScriptWrapper:true, showInPresentation:true, style:'font-size:0.9em' } -->
 <!-- # Classes and Inheritance in ES6 -->
-- Sub classing is done using the `extend` keyword
+- Sub classing is done using the `extends` keyword
 
 ```javascript
 class Mammal {
@@ -121,10 +121,10 @@ class Person extends Mammal {
 <!-- attr: { showInPresentation: true, hasScriptWrapper: true, style:'font-size: 0.9em' } -->
 # Free Trainings<br/>@ Telerik Academy
 - "Web Design with HTML 5, CSS 3 and JavaScript" course @ Telerik Academy
-    - [javascript course](http://academy.telerik.com/student-courses/web-design-and-ui/javascript-fundamentals/about)
-  - Telerik Software Academy
-    - [academy.telerik.com](http://academy.telerik.com)
-  - Telerik Academy @ Facebook
-    - [facebook.com/TelerikAcademy](https://facebook.com/TelerikAcademy)
-  - Telerik Software Academy Forums
-    - [forums.academy.telerik.com](https://telerikacademy.com/Forum/Home)
+  - [javascript course](http://academy.telerik.com/student-courses/web-design-and-ui/javascript-fundamentals/about)
+- Telerik Software Academy
+  - [https://telerikacademy.com](https://telerikacademy.com)
+- Telerik Academy @ Facebook
+  - [facebook.com/TelerikAcademy](https://facebook.com/TelerikAcademy)
+- Telerik Software Academy Forums
+  - [https://telerikacademy.com/Forum/Home](https://telerikacademy.com/Forum/Home)
