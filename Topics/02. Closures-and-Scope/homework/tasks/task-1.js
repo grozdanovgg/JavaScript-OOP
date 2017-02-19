@@ -3,18 +3,33 @@ function solve() {
         var books = [];
         var categories = [];
 
+
         function listBooks() {
-            if (books.length === 0) {
-                return [];
-            }
-            if (books.length === 1) {
-                return books;
-            }
-            if (!categories.some(x => x === this.book.category)) {
-                return [];
+
+            if (!arguments[0]) {
+
+                if (books.length === 0) {
+                    return [];
+                }
+                if (books.length === 1) {
+                    return books;
+                }
+            } else {
+                if (arguments[0].hasOwnProperty('category')) {
+                    return books.filter(x => x.category === arguments[0].category)
+
+                } else if (arguments[0].hasOwnProperty('author')) {
+                    for (var b of books) {
+                        if (b === arguments[0].author) {
+                            return b;
+                        } else {
+                            return [];
+                        }
+                    }
+                }
             }
 
-            return books;
+            //return books;
         }
 
         function addBook(book) {
@@ -32,23 +47,27 @@ function solve() {
                 throw Error('Book title already added!')
             }
 
-            if (books.some(x => x.ISBN === book.ISBN)) {
+            if (books.some(x => x.isbn === book.isbn)) {
                 throw Error('This ISBN already exist in the collection!')
             }
 
-            if (categories.some(x => x.category !== book.category)) {
+            if (!checkAvailability(categories, book.category)) {
                 categories.push(book.category);
+            }
+
+            function checkAvailability(arr, val) {
+                return arr.some(function(arrVal) {
+                    return val == arrVal;
+                });
             }
 
             books.push(book);
             book.ID = books.length + 1;
+
             return book;
         }
 
         function listCategories() {
-            // if (arguments.length === 1) {
-            //     return arguments;
-            // }
             return categories;
         }
 
