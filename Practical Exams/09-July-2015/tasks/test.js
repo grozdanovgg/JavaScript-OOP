@@ -152,8 +152,8 @@ class Catalog {
             } else if (!isItem) {
                 throw "The input is not a valid item";
             } else {
-                for (let i = 0; i < arguments.length; i += 1) {
-                    this._items.push(arguments[i]);
+                for (let j = 0; j < arguments.length; j += 1) {
+                    this._items.push(arguments[j]);
                 }
             }
         }
@@ -161,30 +161,41 @@ class Catalog {
     }
 
     find(id) {
+        console.log(id);
         if (typeof id === 'number') {
             if (this._items.find(x => x.id === id)) {
                 return this._items.find(x => x.id === id);
             } else {
                 return null;
             }
-        } else if (typeof id === undefined) {
+        } else if (id === undefined || id === null) {
             throw "ID must be defined";
+            //return null;
         } else {
             let result = [],
+                optionResult = [],
                 tempArr = [],
                 optionID = id.id,
                 optionName = id.name;
+            console.log("Option ID is:" + optionID);
+            console.log("Option name is:" + optionName);
             if (optionID) {
                 tempArr = this._items.filter(x => x.id === optionID);
                 for (let item of tempArr) {
-                    result.push(item);
+                    optionResult.push(item);
                 }
             }
             if (optionName) {
                 tempArr = this._items.filter(x => x.id === optionName);
                 for (let item of tempArr) {
-                    result.push(item);
+                    optionResult.push(item);
                 }
+            }
+            if (optionResult.length > 0) {
+                return optionResult;
+            }
+            if (result.length === 0) {
+                throw "ID must be defined";
             }
             return result;
         }
@@ -248,4 +259,4 @@ bookItem3 = new Book("gagaga", "Imeto", "1234567890", "igralen")
 // bc.add(bookItem2);
 bc.add(bookItem1, bookItem2);
 
-console.log(bc.find(4));
+console.log(bc.find("text"));
