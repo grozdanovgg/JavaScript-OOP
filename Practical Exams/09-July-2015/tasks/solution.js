@@ -161,26 +161,40 @@ function solve() {
             return this;
         }
 
-        find(x) {
-            if (typeof x === 'number') {
-                for (let item of this.items) {
-                    if (item.id === x) {
-                        return item;
+        find(id) {
+
+            if (typeof id === 'number') {
+                if (this._items.find(x => x.id === id)) {
+                    return this._items.find(x => x.id === id);
+                } else {
+                    return null;
+                }
+            } else if (id.id || id.name) {
+                // console.log(id.id);
+                // console.log(id.name);
+                let result = [],
+                    tempArr = [],
+                    optionID = id.id,
+                    optionName = id.name;
+
+                if (id.id) {
+                    tempArr = this._items.filter(x => x.id === optionID);
+                    for (let item of tempArr) {
+                        result.push(item);
                     }
                 }
-
-                return null;
+                if (id.name) {
+                    tempArr = this._items.filter(x => x.id === optionName);
+                    for (let item of tempArr) {
+                        result.push(item);
+                    }
+                }
+                //console.log(result);
+                return result;
+            } else {
+                //console.log(id);
+                throw "ID must be defined";
             }
-
-            if (x !== null && typeof x === 'object') {
-                return this.items.filter(function(item) {
-                    return Object.keys(x).every(function(prop) {
-                        return x[prop] === item[prop];
-                    });
-                });
-            }
-
-            throw 'Invalid options or id';
         }
         search(pattern) {
             let result = [],
@@ -221,6 +235,39 @@ function solve() {
 
             return result.map(x => x.toLowerCase());
         }
+    }
+
+    class MediaCatalog extends Catalog {
+        constructor(name) {
+            super(name);
+        }
+
+        add(...medias) {
+            if (Array.isArray(medias[0])) {
+                medias = medias[0];
+            }
+
+            medias.forEach(function(x) {
+                if (!(x instanceof Media)) {
+                    throw 'Must add only medias';
+                }
+            });
+
+            return super.add(...medias);
+        }
+        getTop(count) {
+            if (typeof count !== 'number') {
+                throw 'Count should be a number';
+            }
+            if (count < 1) {
+                throw 'Count must be more than 1';
+            }
+
+            return this.items
+                .sort((a, b) => a.rating < b.rating)
+                .filter((_, ind) => ind < count)
+                .map(x => ({ id: x.id, name: x.name }));
+        }
 
     }
 
@@ -235,7 +282,7 @@ function solve() {
             return new BookCatalog(name);
         },
         getMediaCatalog: function(name) {
-            // return a media catalog instance
+            return new MediaCatalog(name);
         }
     };
 }
