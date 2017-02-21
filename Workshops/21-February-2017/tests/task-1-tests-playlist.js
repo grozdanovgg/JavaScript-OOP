@@ -32,7 +32,7 @@ describe('Audio Player test', function () {
 
 		it('expect Audio ids to be unique', function() {
 			const items = Array.from({ length: 100 })
-				.map((_, i) => result.getAudio('Title', 'Author', i));
+				.map((_, i) => result.getAudio('Title', 'Author', i + 1));
 			const ids = items.map(x => x.id)
 				.sort()
 				.forEach((x, i, arr) => {
@@ -59,7 +59,7 @@ describe('Audio Player test', function () {
 		it('expect getVideo() to set Video properties', function() {
 			const title = 'Title';
 			const author = 'Author';
-			const imdbRating = 42;
+			const imdbRating = 4;
 
 			const item = result.getVideo(title, author, imdbRating);
 
@@ -77,7 +77,7 @@ describe('Audio Player test', function () {
 		});
 
 		it('expect Videos to have a number id', function() {
-			const item = result.getVideo('Title', 'Author', 42);
+			const item = result.getVideo('Title', 'Author', 2);
 			expect(item.id).to.be.a('number');
 			expect(item.id > 0).to.be.true;
 		});
