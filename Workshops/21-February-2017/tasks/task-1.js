@@ -25,6 +25,7 @@ function solve() {
             }
         }
     }
+
     class Player {
         set name(name) {
             validator.validateString(name);
@@ -64,15 +65,60 @@ function solve() {
             let index = this._playList.findIndex(function(x) {
                 return x.id === id;
             });
-            if (index > 0) {
+            if (index >= 0) {
                 return this._playList[index];
             } else {
                 return null;
             }
         }
-        removePlayable(id) {}
-        removePlayable(playable) {}
-        listPlayables(page, size) {}
+        removePlayable(idOrPlayable) {
+            if (idOrPlayable.id) {
+                let index = this._playList.findIndex(function(x) {
+                    return x.id === idOrPlayable.id;
+                });
+                if (index >= 0) {
+                    this._playList.splice(index, 1)
+                } else {
+                    throw "Playable with the provided id is not contained in the playlist";
+                }
+            } else {
+                let index = this._playList.findIndex(function(x) {
+                    return x.id === idOrPlayable;
+                });
+                if (index >= 0) {
+                    this._playList.splice(index, 1)
+                } else {
+                    throw "Playable with the provided id is not contained in the playlist";
+                }
+            }
+            return this;
+        }
+        listPlayables(page, size) {
+            let arr = this._playList,
+                start = 0,
+                end = 0;
+            arr.sort(function(a, b) {
+                if (a.title < b.title)
+                    return -1;
+                if (a.title > b.title)
+                    return 1;
+                return 0;
+            }).sort(function(a, b) { return a.id - b.id })
+
+            if (arr.length < size) {
+                return this._playList;
+            }
+            if (page * size >= arr.length ||
+                page < 0 ||
+                size <= 0) {
+                throw "Input parameters not OK"
+            }
+            start = page * size;
+            end = ((page + 1) * size)
+            arr = arr.slice(start, end)
+
+            return arr;
+        }
 
 
     }
