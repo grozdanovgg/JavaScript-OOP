@@ -23,19 +23,93 @@ function solve() {
             if (!(playable instanceof Playable)) {
                 throw "Input should be of type Playable"
             }
+        },
+        isPayListInstance: function(playListToAdd) {
+            if (!(playlistToAdd instanceof PlayList)) {
+                throw 'playlistToAdd must be a PlayList instance';
+            }
         }
     }
 
     class Player {
         set name(name) {
             validator.validateString(name);
-            this._name = name;
+            this.name = name;
+            this._playersList = [];
         }
         get name() {
             return this._name;
         }
+        set name(name) {
+            validator.validateString(name);
+            this._name = name;
+        }
 
         addPlaylist(playlistToAdd) {
+            validator.isPayListInstance(playlistToAdd);
+            this._playersList.push(playlistToAdd);
+            return this;
+        }
+
+        getPlaylistById(id) {
+            let index = this._playersList.findIndex(function(x) {
+                return x.id === id;
+            });
+            if (index >= 0) {
+                return this._playersList[index];
+            } else {
+                return null;
+            }
+        }
+        removePlaylist(idOrPlayable) {
+            if (idOrPlayable.id) {
+                let index = this._playersList.findIndex(function(x) {
+                    return x.id === idOrPlayable.id;
+                });
+                if (index >= 0) {
+                    this._playersList.splice(index, 1)
+                } else {
+                    throw "Playable with the provided id is not contained in the playlist";
+                }
+            } else {
+                let index = this._playersList.findIndex(function(x) {
+                    return x.id === idOrPlayable;
+                });
+                if (index >= 0) {
+                    this._playersList.splice(index, 1)
+                } else {
+                    throw "Playable with the provided id is not contained in the playlist";
+                }
+            }
+            return this;
+        }
+        listPlaylists(page, size) {
+            let arr = this._playersList,
+                start = 0,
+                end = 0;
+            arr.sort(function(a, b) {
+                if (a.title < b.title)
+                    return -1;
+                if (a.title > b.title)
+                    return 1;
+                return 0;
+            }).sort(function(a, b) { return a.id - b.id })
+
+            if (arr.length < size) {
+                return this._playersList;
+            }
+            if (page * size >= arr.length ||
+                page < 0 ||
+                size <= 0) {
+                throw "Input parameters not OK"
+            }
+            start = page * size;
+            end = ((page + 1) * size)
+            arr = arr.slice(start, end)
+
+            return arr;
+        }
+        contains(playable, playlist) {
 
         }
     }
@@ -54,6 +128,9 @@ function solve() {
         }
         get name() {
             return this._name;
+        }
+        get playList() {
+            return this._playlist;
         }
 
         addPlayable(playable) {
@@ -119,8 +196,6 @@ function solve() {
 
             return arr;
         }
-
-
     }
     class Playable {
         constructor(title, author) {
