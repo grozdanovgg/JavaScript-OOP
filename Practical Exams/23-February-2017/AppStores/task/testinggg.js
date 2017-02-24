@@ -96,14 +96,13 @@ class App {
             this.version = input;
         } else {
             VALIDATOR.isVersionSequential(input.version);
-            this.version = input.version;
             if (input.description) {
                 VALIDATOR.isDescriptionValid(input.description)
-                this._description = input.description;
+                this.description = input.description;
             }
             if (input.rating) {
                 VALIDATOR.isRatingValid(input.rating);
-                this._rating = input.rating;
+                this.rating = input.rating;
             }
         }
     }
@@ -121,8 +120,17 @@ class Store extends App {
 
     uploadApp(app) {
         VALIDATOR.isApp(app);
-        if (this.apps.find(x => x.name)) {
-            super.release(app);
+        if (this.apps.find(x => x.name === app.name)) {
+            for (let x of this.apps) {
+                if (x.name === app.name) {
+                    if (x.version <= app.version) {
+                        x.version = app.version;
+                    } else {
+                        throw `The new version ${app.name} - ${app.version} is not bigger than the old one$ ${x.version}`;
+                    }
+                }
+            }
+
         } else {
             this.apps.push(app);
         }
@@ -247,23 +255,46 @@ class Device {
         return result;
     }
     install(name) {
-        let result = [];
+        let stores = [],
+            appsArr = [],
+            appsList = [],
+            result = [],
+            appToInstall;
 
-        result = this.apps.filter(x => x instanceof Store)
-            .forEach(store => store.apps.filter(app => app.name.search(name) !== -1))
-            .sort(function(a, b) {
-                if (a.version < b.version)
-                    return 1;
-                if (a.version > b.version)
-                    return -1;
-                return 0;
-            });
+        stores = this.apps.filter(x => x instanceof Store);
+        stores.forEach(store => appsArr.push(store.apps));
+
+        for (let item of appsArr) {
+            item.forEach(x => appsList.push(x))
+        }
+        result = appsList.filter(x => x.name === name);
+
+
         if (result.length === 0) {
-            throw 'Name is not available in installed stores'
+
+            throw 'App name is not available in installed stores'
         }
-        if (apps.findIndex(x => x.name === result[0].name) = -1) {
-            this._apps.push(result[0]);
-        }
+
+        result = result.sort(function(a, b) {
+            if (a.version < b.version)
+                return 1;
+            if (a.version > b.version)
+                return -1;
+            return 0;
+        });
+        appToInstall = result[0];
+        console.log(this.apps);
+        console.log('xxx');
+
+        this.apps.push(appToInstall);
+        console.log(this.apps);
+
+        // if (result.length === 0) {
+        //     throw 'Name is not available in installed stores'
+        // }
+        // if (apps.findIndex(x => x.name === result[0].name) = -1) {
+        //     this._apps.push(result[0]);
+        // }
         return this;
     }
     uninstall(name) {
@@ -320,27 +351,37 @@ class Device {
 }
 
 
-let app1 = new App("Ime", "Descrion tralala", 5, 3);
-let app2 = new App("Ime2", "Descripo2 tralala", 1, 2);
-let app3 = new App("Ime3", "Descripo2 tralala", 1, 2);
-let app4 = new App("Ime4", "Descrip2 tralala", 1, 2);
-let store1 = new Store("Ime", "Descpon tralala", 4, 7)
-let store2 = new Store("Im2e", "Descposdfgn tralala", 3, 5)
+let app1a = new App("App1", "Descrion tralala", 5, 3);
+let app1b = new App("App1", "Descrion tralala", 6, 3);
+let app1c = new App("App1", "Descrion tralala", 4, 3);
+let app2 = new App("App2", "Descripo2 tralala", 1, 2);
+let app3 = new App("App3", "Descripo2 tralala", 1, 2);
+let app4 = new App("App4", "Descrip2 tralala", 1, 2);
+let store1 = new Store("Store1", "Descpon tralala", 4, 7)
+let store2 = new Store("Store2", "Descposdfgn tralala", 3, 5)
+store1.uploadApp(app1a);
+store1.uploadApp(app1b);
+store1.uploadApp(app2);
+store2.uploadApp(app1b);
+store2.uploadApp(app3);
+store2.uploadApp(app4);
 
-let appsArray = [app1, app2, app3, app4, store1, store2];
+let appsArray = [app4, store1, store2];
 
 let iphone = new Device("hostname1", appsArray)
 
 // console.log(iphone.listInstalled);
-console.log(iphone.listInstalled());
+// console.log(iphone.listInstalled());
+iphone.listInstalled();
+
 
 iphone.update();
-iphone.install(app2);
+iphone.install("App1");
 
 
 // console.log(app1);
 
-store1.uploadApp(app1);
+store1.uploadApp(app1a);
 store1.uploadApp(app2);
 store2.uploadApp(app3);
 store2.uploadApp(app4);

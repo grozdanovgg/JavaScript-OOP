@@ -98,14 +98,13 @@ function solve() {
                 this.version = input;
             } else {
                 VALIDATOR.isVersionSequential(input.version);
-                this.version = input.version;
                 if (input.description) {
                     VALIDATOR.isDescriptionValid(input.description)
-                    this._description = input.description;
+                    this.description = input.description;
                 }
                 if (input.rating) {
                     VALIDATOR.isRatingValid(input.rating);
-                    this._rating = input.rating;
+                    this.rating = input.rating;
                 }
             }
         }
@@ -120,11 +119,19 @@ function solve() {
             return this._apps;
         }
 
-
         uploadApp(app) {
             VALIDATOR.isApp(app);
-            if (this.apps.find(x => x.name)) {
-                super.release(app);
+            if (this.apps.find(x => x.name === app.name)) {
+                for (let x of this.apps) {
+                    if (x.name === app.name) {
+                        if (x.version <= app.version) {
+                            x.version = app.version;
+                        } else {
+                            throw `The new version ${app.name} - ${app.version} is not bigger than the old one$ ${x.version}`;
+                        }
+                    }
+                }
+
             } else {
                 this.apps.push(app);
             }
@@ -216,7 +223,6 @@ function solve() {
             let result = [],
                 stores = [];
 
-
             //v 1.0
             // result = this.apps.filter(x => x instanceof Store)
             //     .forEach(store => store.apps.filter(app => app.name.search(pattern) !== -1))
@@ -249,23 +255,40 @@ function solve() {
             return result;
         }
         install(name) {
-            let result = [];
+            let stores = [],
+                appsArr = [],
+                appsList = [],
+                result = [],
+                appToInstall;
 
-            result = this.apps.filter(x => x instanceof Store)
-                .forEach(store => store.apps.filter(app => app.name.search(name) !== -1))
-                .sort(function(a, b) {
-                    if (a.version < b.version)
-                        return 1;
-                    if (a.version > b.version)
-                        return -1;
-                    return 0;
-                });
+            stores = this.apps.filter(x => x instanceof Store);
+            stores.forEach(store => appsArr.push(store.apps));
+
+            for (let item of appsArr) {
+                item.forEach(x => appsList.push(x))
+            }
+
+            result = appsList.filter(x => x.name === name);
+
             if (result.length === 0) {
-                throw 'Name is not available in installed stores'
+                throw 'App name is not available in installed stores'
             }
-            if (apps.findIndex(x => x.name === result[0].name) = -1) {
-                this._apps.push(result[0]);
-            }
+
+            result = result.sort(function(a, b) {
+                if (a.version < b.version)
+                    return 1;
+                if (a.version > b.version)
+                    return -1;
+                return 0;
+            });
+
+            appToInstall = result[0];
+            console.log(this.apps);
+            console.log('xxx');
+
+            this.apps.push(appToInstall);
+            console.log(this.apps);
+
             return this;
         }
         uninstall(name) {
