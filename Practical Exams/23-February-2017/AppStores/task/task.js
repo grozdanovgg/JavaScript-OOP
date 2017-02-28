@@ -51,7 +51,6 @@ function solve() {
             }
         }
     }
-
     class App {
         constructor(name, description, version, rating) {
             this.name = name;
@@ -109,7 +108,6 @@ function solve() {
             }
         }
     }
-
     class Store extends App {
         constructor(name, description, version, rating) {
             super(name, description, version, rating);
@@ -119,33 +117,6 @@ function solve() {
             return this._apps;
         }
 
-        uploadApp(app) {
-            VALIDATOR.isApp(app);
-            if (this.apps.find(x => x.name === app.name)) {
-                for (let x of this.apps) {
-                    if (x.name === app.name) {
-                        if (x.version <= app.version) {
-                            x.version = app.version;
-                        } else {
-                            throw `The new version ${app.name} - ${app.version} is not bigger than the old one$ ${x.version}`;
-                        }
-                    }
-                }
-
-            } else {
-                this.apps.push(app);
-            }
-            return this;
-        }
-        takedownApp(name) {
-            let index = this.apps.findIndex(x => x.name === name);
-            if (index >= 0) {
-                this._apps.splice(index, 1);
-            } else {
-                throw 'The app with the given name does not exist in the store';
-            }
-            return this;
-        }
         search(pattern) {
             let arr = [],
                 result = [];
@@ -197,7 +168,6 @@ function solve() {
             });
         }
     }
-
     class Device {
         constructor(hostname, apps) {
             this.hostname = hostname;
@@ -343,6 +313,7 @@ function solve() {
             }
         }
     }
+
     return {
         createApp(name, description, version, rating) {
             // returns a new App object
