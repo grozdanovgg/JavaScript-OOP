@@ -1,281 +1,387 @@
 function solve() {
-	function validateName(name) {
-		if(typeof name !== 'string' || !name.match(/^([a-zA-Z0-9]|\s){1,24}$/)) {
-			throw Error('name is not valid');
-		}
-	}
+    let getID = (function() {
+        let id = 0;
 
-	function validateDescription(description) {
-		if(typeof description !== 'string') {
-			throw Error('description is not valid');
-		}
-	}
+        return function() {
+            id += 1;
+            return id;
+        };
+    }());
 
-	function validateVersion(version) {
-		if(typeof version !== 'number' || !(version > 0) || Number.isNaN(version)) {
-			throw Error('version is not valid');
-		}
-	}
+    const VALIDATOR = {
+        isNameValid(name) {
+            if (typeof name !== 'string' ||
+                name.length < 1 ||
+                name.length > 24 ||
+                !(/^[a-zA-Z1-9 ]*$/.test(name))) {
+                throw 'Name must be with length between 1 and 24 latin letters, numbers and whitespace'
+            }
+        },
+        isDescriptionValid(description) {
+            if (typeof description !== 'string') {
+                throw 'Description must be valid string'
+            }
+        },
+        isVersionValid(version) {
+            if (typeof version !== 'number' || version < 0) {
+                throw 'Expect positive number'
+            }
+        },
+        isVersionSequential(version, currentVersion) {
+            if (version <= currentVersion) {
+                throw Error('The new version is not above the old one')
+            } else {}
 
-	function validateRating(rating) {
-		if(typeof rating !== 'number' || rating < 1 || rating > 10 || Number.isNaN(rating)) {
-			throw Error('rating is not valid');
-		}
-	}
+        },
+        isRatingValid(rating) {
+            if (typeof rating !== 'number' || rating < 1 || rating > 10) {
+                throw 'Expect number between 1 and 10'
+            }
+        },
+        isApp(app) {
+            if (!(app instanceof App)) {
+                throw 'App must be a valid instance of the App class'
+            }
+        },
+        isHostNameValid(hostname) {
+            if (typeof hostname !== 'string' ||
+                hostname.length < 1 ||
+                hostname.length > 32) {
+                throw 'String must be with length between 1 and 24 latin letters, numbers and whitespace'
+            }
+        }
+    }
 
-	function validateHostname(hostname) {
-		if(typeof hostname !== 'string' || hostname.length < 1 || hostname.length > 32) {
-			throw Error('hostname is not valid');
-		}
-	}
+    class App {
+        constructor(name, description, version, rating) {
+            this.name = name;
+            this.description = description;
+            this.version = version;
+            this.rating = rating;
+            this._id = getID();
+        }
+        set name(name) {
+            VALIDATOR.isNameValid(name);
+            this._name = name;
+        }
+        get name() {
+            return this._name;
+        }
+        set description(description) {
+            VALIDATOR.isDescriptionValid(description);
+            this._description = description;
+        }
+        get description() {
+            return this._description;
+        }
+        set version(version) {
+            VALIDATOR.isVersionValid(version);
+            this._version = version;
+        }
+        get version() {
+            return this._version;
+        }
+        set rating(rating) {
+            VALIDATOR.isRatingValid(rating);
+            this._rating = rating;
+        }
+        get rating() {
+            return this._rating;
+        }
+        get id() {
+            return this._id;
+        }
 
-	function copyApp(app) {
-		return {
-			name: app.name,
-			description: app.description,
-			version: app.version,
-			rating: app.rating,
-			apps: app.apps // this is for stores
-		};
-	}
+        release(input) {
+            if (typeof input === 'number') {
+                VALIDATOR.isVersionSequential(input, this.version);
+                this.version = input;
+            } else if (input.version || input.description) {
+                if (input.version) {
+                    VALIDATOR.isVersionSequential(input.version, this.version);
+                    this.version = input.version;
+                }
+                if (input.description) {
+                    VALIDATOR.isDescriptionValid(input.description, this.version);
+                    this.description = input.description;
+                }
+                if (input.rating) {
+                    VALIDATOR.isRatingValid(input.rating);
+                    this.rating = input.rating;
+                }
+            } else {
+                throw 'Input version not a number';
+            }
+            return this;
+        }
+    }
 
-	class App {
-		constructor(name, description, version, rating) {
-			validateName(name);
-			validateDescription(description);
-			validateVersion(version);
-			validateRating(rating);
+    class Store extends App {
+        constructor(name, description, version, rating) {
+            super(name, description, version, rating);
+            this._apps = [];
+        }
+        get apps() {
+            return this._apps;
+        }
 
-			this._name = name;
-			this._description = description;
-			this._version = version;
-			this._rating = rating;
-		}
+        uploadApp(app) {
+            VALIDATOR.isApp(app);
+            if (this.apps.find(x => x.name === app.name)) {
+                for (let x of this.apps) {
+                    if (x.name === app.name) {
+                        if (x.version <= app.version) {
+                            x.version = app.version;
+                            x.rating = app.rating;
+                            x.description = app.description;
+                        } else {
+                            throw `The new version ${app.name} - ${app.version} is not bigger than the old one ${x.version}`;
+                        }
+                    }
+                }
+            } else {
+                let appToUpload = {
+                    name: app.name,
+                    description: app.description,
+                    version: app.version,
+                    rating: app.rating
+                }
+                this.apps.push(appToUpload);
+            }
+            return this;
+        }
+        takedownApp(name) {
+            let index = this.apps.findIndex(x => x.name === name);
+            if (index >= 0) {
+                this._apps.splice(index, 1);
+            } else {
+                throw 'The app with the given name does not exist in the store';
+            }
 
-		get name() {
-			return this._name;
-		}
 
-		get description() {
-			return this._description;
-		}
+            return this;
+        }
+        search(pattern) {
+            let arr = [],
+                result = [];
+            arr = this._apps.filter(x => x.name.search(pattern) !== -1);
+            console.log(arr);
+            for (let item of arr) {
+                result.push(item)
+            }
+            console.log(result);
 
-		get version() {
-			return this._version;
-		}
+            result.sort(function(a, b) {
+                if (a.name < b.name)
+                    return -1;
+                if (a.name > b.name)
+                    return 1;
+                return 0;
+            })
+            console.log(result);
+            return result;
+        }
+        listMostRecentApps(count) {
+            let arr = this._apps,
+                result = [];
+            if (typeof count === 'number') {
+                for (let i = (arr.length - 1); i >= (arr.length - 1 - count); i -= 1) {
+                    result.push(arr[i]);
+                }
+            } else {
+                for (let i = (arr.length - 1); i >= (arr.length - 11); i -= 1) {
+                    result.push(arr[i]);
+                }
+            }
+            return result.sort(function(a, b) {
+                return b.id - a.id;
+            });
+        }
+        listMostPopularApps(count) {
+            let arr = this._apps,
+                result = [];
 
-		get rating() {
-			return this._rating;
-		}
+            if (typeof count === 'number') {
+                for (let i = (arr.length - 1); i >= (arr.length - 1 - count); i -= 1) {
+                    result.push(arr[i]);
+                }
+            } else {
+                for (let i = (arr.length - 1); i >= (arr.length - 11); i -= 1) {
+                    result.push(arr[i]);
+                }
+            }
+            return result.sort(function(a, b) {
+                return b.rating - a.rating;
+            });
+        }
+    }
 
-		release(options) {
-			if(typeof options !== 'object') {
-				options = {version: options};
-			}
+    class Device {
+        constructor(hostname, apps) {
+            this.hostname = hostname;
+            this.apps = apps;
+        }
+        set hostname(hostname) {
+            VALIDATOR.isHostNameValid(hostname);
+            this._hostname = hostname;
+        }
+        get hostname() {
+            return this._hostname;
+        }
+        set apps(apps) {
+            for (let app of apps) {
+                VALIDATOR.isApp(app);
+            }
+            this._apps = apps;
+        }
+        get apps() {
+            return this._apps;
+        }
+        search(pattern) {
+            let result = [],
+                stores = [];
 
-			validateVersion(options.version);
-			if(!(options.version > this._version)) {
-				throw Error('version is not valid'); 
-			}
-			this._version = options.version;
 
-			if(options.hasOwnProperty('description')) {
-				validateDescription(options.description);
-				this._description = options.description;
-			}
+            //v 1.0
+            // result = this.apps.filter(x => x instanceof Store)
+            //     .forEach(store => store.apps.filter(app => app.name.search(pattern) !== -1))
+            //     .sort(function(a, b) {
+            //         if (a.name < b.name)
+            //             return -1;
+            //         if (a.name > b.name)
+            //             return 1;
+            //         return 0;
+            //     });
+            // return result;
 
-			if(options.hasOwnProperty('rating')) {
-				validateRating(options.rating);
-				this._rating = options.rating;
-			}
+            //v 2.0
+            stores = this.apps.filter(x => x instanceof Store);
 
-			return this;
-		}
-	}
+            for (let store of stores) {
+                for (let app of store.apps) {
+                    if (app.name.search(pattern) > -1) {
+                        result.push(app);
+                    }
+                }
+            }
+            result.sort(function(a, b) {
+                if (a.name < b.name)
+                    return -1;
+                if (a.name > b.name)
+                    return 1;
+                return 0;
+            });
+            return result;
+        }
+        install(name) {
+            let stores = [],
+                appsArr = [],
+                appsList = [],
+                result = [],
+                appToInstall;
 
-	class Store extends App {
-		constructor(...params) {
-			super(...params);
-			this._apps = [];
-		}
+            stores = this.apps.filter(x => x instanceof Store);
+            stores.forEach(store => appsArr.push(store.apps));
 
-		get apps() {
-			return this._apps;
-		}
+            for (let item of appsArr) {
+                item.forEach(x => appsList.push(x))
+            }
+            result = appsList.filter(x => x.name === name);
 
-		uploadApp(app) {
-			if(!(app instanceof App)) {
-				throw Error('Not a valid app');
-			}
 
-			const index = this._apps.findIndex(x => x.name === app.name);
-			if(index >= 0) {
-				this._apps.splice(index, 1);
-			}
-			this._apps.push(copyApp(app));
+            if (result.length === 0) {
 
-			return this;
-		}
+                throw 'App name is not available in installed stores'
+            }
 
-		takedownApp(name) {
-			const index = this._apps.findIndex(x => x.name === name);
-			if(index < 0) {
-				throw Error('App not found');
-			}
+            result = result.sort(function(a, b) {
+                if (a.version < b.version)
+                    return 1;
+                if (a.version > b.version)
+                    return -1;
+                return 0;
+            });
+            appToInstall = result[0];
+            // console.log(this.apps);
+            // console.log('xxx');
 
-			this._apps.splice(index, 1);
+            this.apps.push(appToInstall);
+            // console.log(this.apps);
 
-			return this;
-		}
+            // if (result.length === 0) {
+            //     throw 'Name is not available in installed stores'
+            // }
+            // if (apps.findIndex(x => x.name === result[0].name) = -1) {
+            //     this._apps.push(result[0]);
+            // }
+            return this;
+        }
+        uninstall(name) {
+            let index = this.apps.findIndex(app => app.name === name);
+            if (index >= 0) {
+                this._apps.splice(index, 1);
+            } else {
+                throw 'The app with the given name does not exist in the store';
+            }
+            return this;
+        }
+        listInstalled() {
+            // v 1.0
+            // let result = [];
+            // result = this.apps.sort(function(a, b) {
+            //     if (a.version < b.version)
+            //         return -1;
+            //     if (a.version > b.version)
+            //         return 1;
+            //     return 0;
+            // });
+            // return result;
 
-		search(pattern) {
-			pattern = pattern.toLowerCase();
+            // v 2.0
+            let result = [];
+            result = this.apps.sort(function(a, b) {
+                if (a.version < b.version)
+                    return 1;
+                if (a.version > b.version)
+                    return -1;
+                return 0;
+            });
+            return result;
+        }
+        update() {
+            let stores = this.apps.filter(x => x instanceof Store),
+                deviceApps = this.apps,
+                tempArr = [];
 
-			return (this._apps
-				.filter(app => app.name.toLowerCase().indexOf(pattern) >= 0)
-				.sort((x, y) => x.name.localeCompare(y.name)));
-		}
+            for (let store of stores) {
+                for (let appFromStore of store.apps) {
+                    for (let app of deviceApps) {
+                        if (appFromStore.name === app.name) {
+                            if (appFromStore.version > app.version) {
+                                app = appFromStore;
+                                // app.version = appFromStore.version;
+                                // install(apppFromStorep)
+                            }
+                        }
+                    }
+                }
+            }
+            return this;
+        }
+    }
 
-		listMostRecentApps(count) {
-			count = count || 10;
 
-			return this._apps.slice()
-				.reverse()
-				.slice(0, count);
-		}
-
-		listMostPopularApps(count) {
-			count = count || 10;
-
-			return this._apps.map((app, index) => ({app, index}))
-				.sort((x, y) => {
-					if(y.app.rating !== x.app.rating) {
-						return y.app.rating - x.app.rating;
-					}
-					return y.app.index - x.app.index;
-				})
-				.slice(0, count)
-				.map(x => x.app);
-		}
-	}
-
-	class Device {
-		constructor(hostname, apps) {
-			validateHostname(hostname);
-
-			if(!Array.isArray(apps)) {
-				throw Error('apps must be an array of apps');
-			}
-			if(!apps.every(x => x instanceof App)) {
-				throw Error('There is non-app in the apps array');
-			}
-
-			this._hostname = hostname;
-			this._apps = apps.map(x => copyApp(x));
-			this._stores = apps.filter(x => x instanceof Store).map(x => copyApp(x));
-		}
-
-		get hostname() {
-			return this._hostname;
-		}
-
-		get apps() {
-			return this._apps.slice();
-		}
-
-		search(pattern) {
-			pattern = pattern.toLowerCase();
-
-			const result = {};
-			this._stores.forEach(store => {
-				store.apps.forEach(x => {
-					if(x.name.toLowerCase().indexOf(pattern) < 0) {
-						return;
-					}
-					if(result.hasOwnProperty(x.name) && x.version <= result[x.name].version) {
-						return;
-					}
-					result[x.name] = x;
-				});
-			});
-
-			// bgcoder does not support Object.values @ the moment (Thu Feb 23 15:35:42 EET 2017)
-			return Object.keys(result).sort().map(key => result[key]);
-		}
-
-		install(name) {
-			let bestApp = {version: -1};
-			this._stores.forEach(store => {
-				const currApp = store.apps.find(x => x.name === name);
-				if(currApp && bestApp.version < currApp.version) {
-					bestApp = currApp;
-				}
-			});
-
-			if(bestApp.version < 0) {
-				throw Error('Error app not found');
-			}
-
-			if(this._apps.every(x => x.name !== name)) {
-				this._apps.push(copyApp(bestApp));
-				if(bestApp instanceof Store) {
-					this._stores.push(copyApp(bestApp));
-				}
-			}
-
-			return this;
-		}
-
-		uninstall(name) {
-			let index = this._apps.findIndex(x => x.name === name);
-			if(index < 0) {
-				throw Error('App is not installed');
-			}
-			this._apps.splice(index, 1);
-
-			index = this._stores.findIndex(x => x.name === name);
-			if(index >= 0) {
-				this._stores.splice(index, 1);
-			}
-
-			return this;
-		}
-
-		listInstalled() {
-			return (this._apps.slice()
-				.sort((x, y) => x.name.localeCompare(y.name)));
-		}
-
-		update() {
-			this._apps = this._apps.map(app => {
-				const name = app.name;
-
-				let bestApp = app;
-				this._stores.forEach(store => {
-					const currApp = store.apps.find(x => x.name === name);
-					if(currApp && bestApp.version < currApp.version) {
-						bestApp = currApp;
-					}
-				});
-
-				return bestApp;
-			});
-
-			return this;
-		}
-	}
-
-	return {
-		createApp(name, description, version, rating) {
-			return new App(name, description, version, rating);
-		},
-		createStore(name, description, version, rating) {
-			return new Store(name, description, version, rating);
-		},
-		createDevice(hostname, apps) {
-			return new Device(hostname, apps);
-		}
-	};
+    return {
+        createApp(name, description, version, rating) {
+            return new App(name, description, version, rating);
+        },
+        createStore(name, description, version, rating) {
+            return new Store(name, description, version, rating);
+        },
+        createDevice(hostname, apps) {
+            return new Device(hostname, apps);
+        }
+    };
 }
 
 // Submit the code above this line in bgcoder.com
